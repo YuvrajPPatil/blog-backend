@@ -1,14 +1,10 @@
-import { IUser } from "../../models/user.model"; // adjust path as needed
+import { User } from "../models/User";  // adjust import to your project
+import "express-serve-static-core";
 
 declare global {
   namespace Express {
-    interface UserPayload {
-      id: string;
-      email?: string;
-    }
-
     interface Request {
-      user?: UserPayload; // or user: UserPayload if always present
+      user?: User;   // or user: User if always present
     }
   }
 }

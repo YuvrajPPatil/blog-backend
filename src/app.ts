@@ -4,6 +4,8 @@ import dotenv from "dotenv"
 import dbConnect from "./utils/dbConnect";
 import blogRoutes from "./routes/blog.route";
 import authRoutes from  "./routes/auth.route";
+import userRoutes from "./routes/user.route";
+
 dotenv.config();
 dbConnect();
 
@@ -15,6 +17,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/blogs", blogRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/user",userRoutes);
 
   
 // Test Route
