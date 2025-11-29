@@ -4,6 +4,7 @@ export interface IUser extends Document{
     email: string;
     password:string;
     avatar?:string;
+    profileImage?:string;
 }
 
 const userSchema =new Schema<IUser>(
@@ -12,6 +13,7 @@ const userSchema =new Schema<IUser>(
          email:{type: String, required: true,unique:true},
          password:{type:String, required:true},
          avatar:{type:String},// Cloudinary URL
+         profileImage:{type:String} // Cloudinary URL
     },
     {
         timestamps:true

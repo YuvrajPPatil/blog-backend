@@ -49,3 +49,25 @@ export const changePassword=async (req:Request,res:Response)=>{
         return res.status(500).json({message:'Error change password.'});
     }
 }
+
+export const uploadImageProfile=async(req:Request,res:Response)=>{
+    try{
+            const userId=(req as any).user.id;
+            const imageUrl=(req.file as any).path;
+
+            const updatedUser=await User.findByIdAndUpdate(
+                userId,
+                {profileImage:imageUrl},
+                {new:true}
+            );
+            res.json({
+            message: "Profile image updated successfully",
+            user: updatedUser
+            });    
+
+    }catch(error){
+            console.error("Controller error:", error);
+            return res.status(500).json({message:'Image upload error.'});
+ 
+    }
+}
