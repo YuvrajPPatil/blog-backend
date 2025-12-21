@@ -5,13 +5,15 @@ import { request } from "http";
 
 export const createBlog= async(req:Request, res:Response)=>{
     try{
-        const {title,description,content, image}=req.body;
+        const {title,description,content,category, image}=req.body;
         const blog=await Blog.create({
             title,
             description,
             content,
+            category, 
             image,
-            author : req.user.id //from jwt
+            author : req.user.id, //from jwt
+            status:"pending",
         });
        
        return  res.status(201).json(blog);
@@ -28,24 +30,33 @@ export const getBlogs= async(req:Request,res:Response)=>{
             const skip  =   (page-1)*limit;
 
             const search=req.query.search ? (req.query.search as string) : "";
+            const {category,status}=req.query; 
+            
+            const filter:any={}; //// Build MongoDB filter object
 
-            const query=search 
-                ?{
-                    $or:[
-                        {title:{$regex: search, $options: "i"}},
-                        {description:{$regex: search,$options: "i"}}
-                    ]
+                // Add search filter
+                if (search) {
+                    filter.$or = [
+                        { title: { $regex: search, $options: "i" } },
+                        { description: { $regex: search, $options: "i" } }
+                    ];
                 }
-                :{};
+
+                if (category) {
+                    filter.category = category;
+                }
+
+                 // Add status filter (default: published)
+                filter.status = status || "published";
 
         //const blogs=await Blog.find().populate("author","username email");
-            const blogs=await Blog.find(query)
+            const blogs=await Blog.find(filter)
                 .populate("author","username email")
                 .skip(skip)
                 .limit(limit)
                 .sort({createdAt:-1});
 
-             const total = await Blog.countDocuments(query);
+             const total = await Blog.countDocuments(filter);
 
             res.json({
                 page,
@@ -81,24 +92,21 @@ export const updateBlog=async(req:Request,res:Response)=>{
           return  res.status(400).json({message:"Blog not found"});
         }
         
-         if (typeof blog === "string") {
-            console.log("value is a string");
-        }
-
         //if(blog.author.toString() !== req.user.id)
         if(!req.user || !blog.author.equals(req.user.id))
         {
             return res.status(400).json({message:"Unauthorized to Update"});
         }
 
-        const { title, description, content, image } = req.body;
+        const { title, description, content,category, image } = req.body;
 
         const updatedBlog= await  Blog.findByIdAndUpdate(blogId,
             {
-                    title,description, content, image
+                    title,description, content,category, image
             },
             {
-                    new:true
+                    new:true,
+                    runValidators:true,
             }
         );
 
@@ -153,3 +161,12 @@ export const toggleLikes= async(req:Request,res:Response)=>{
     }
 }
 
+export const approvBlog=async(req:Request,res:Response)=>{
+    await Blog.findByIdAndUpdate(req.params.id,{status:"published"});
+    return res.json({message:"Blog Approved"});
+}
+
+export const rejectBlog=async(req:Request,res:Response)=>{
+        await Blog.findByIdAndUpdate(req.params.id, {status:"rejected"});
+        return res.json({message:"Blog Rejcted"});
+}
