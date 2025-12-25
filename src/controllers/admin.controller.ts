@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Invite from "../models/invite.model";
-import { generateInviteToken,hashInviteToken } from "../utils/invite.utils";
+import { generateInviteToken,getInviteExpiry,hashInviteToken } from "../utils/invite.utils";
 import { INVITE_EXPIRY_DAYS,FRONTEND_URL } from "../config";
 import emailQueue from "../queues/email.queue";
 
@@ -12,9 +12,9 @@ export const createInvite= async(req:Request,res:Response)=>{
 
     //generate token and hash
     const token=generateInviteToken();
-    const tokenHash=hashInviteToken(token);
+    const tokenHash=await hashInviteToken(token);
 
-    const expireAt=new Date(Date.now()+days*24*60*60*1000);
+    const expireAt=getInviteExpiry(5);
 
     const invite= await Invite.create({
         email,
@@ -25,14 +25,14 @@ export const createInvite= async(req:Request,res:Response)=>{
     });
 
     //send token to user via email
-            const inviteUrl=`${process.env.FRONTEND_URL}/register?token=${token}`;
+    const inviteUrl=`${process.env.FRONTEND_URL}/register?token=${token}`;
 
         await emailQueue.add("send-invite-email",{
                 to:email,
             subject:"You're invited to write on our blog",
                 html:`You are invited as <b>${role}</b></p>
                     <p><a href="${inviteUrl}">Register Here </a></p>
-                    <p>Link expires in ${INVITE_EXPIRY_DAYS}</p>`,
+                    <p>Link expires in ${INVITE_EXPIRY_DAYS} days.</p>`,
         });
 
         res.status(200).json({message:'Invite sent successfully"'});

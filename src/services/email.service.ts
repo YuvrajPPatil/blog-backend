@@ -3,12 +3,12 @@ import nodemailer from "nodemailer";
 export async function sendInviteMail(to:string,inviteUrl:string) {
     
     const transporter=nodemailer.createTransport({
-        host:process.env.SMTP_HOST,
-        port:Number(process.env.SMTP_PORT),
+        host:process.env.EMAIL_HOST,
+        port:Number(process.env.EMAIL_PORT),
         secure:false,
         auth:{
-            user:process.env.SMTP_USER,
-            pass:process.env.SMTP_PASS,
+            user:process.env.EMAIL_USER,
+            pass:process.env.EMAIL_PASS,
         }
     });
 
@@ -19,3 +19,4 @@ export async function sendInviteMail(to:string,inviteUrl:string) {
         html:`<p>Click <a href="${inviteUrl}">here</a> to register.</p>`
     });
 }
+// code not used

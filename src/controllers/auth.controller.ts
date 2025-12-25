@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import User,{IUser} from "../models/user.model";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import Invite from "../models/invite.model";
+import {Invite, verifyTokenHash} from "../models/invite.model";
+ 
 export const register =async(req:Request, res:Response)=>{
     try{
          const {username, email, password,inviteToken}=req.body;
@@ -11,6 +12,12 @@ export const register =async(req:Request, res:Response)=>{
 
         if(!invite)return res.status(400).json({message:"Invalid invite"});
         if(!invite.used)return res.status(400).json({message:"Invite already used"});
+        
+        const isValid = await verifyTokenHash(inviteToken, invite.tokenHash);
+        if (!isValid) {
+            return res.status(400).json({ message: "Invalid invite token" });
+        }
+
         if(invite.expireAt < new Date())
             return res.status(400).json({message:"Invite closed"});
  
@@ -38,7 +45,7 @@ export const login= async(req:Request,res:Response)=>{
         const isMatch=await bcrypt.compare(password,user.password);
         if(!isMatch) return res.status(400).json({message:"Invalid Credentials"});
 
-        const token=jwt.sign({id:user._id},process.env.JWT_SECRET as string,{expiresIn:"1h"} );
+        const token=jwt.sign({id:user._id,role:user.role},process.env.JWT_SECRET as string,{expiresIn:"1h"} );
         
         res.status(200).json(
             {message:"Login successful",

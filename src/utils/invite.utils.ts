@@ -15,3 +15,9 @@ export async function hashInviteToken(token:string) {
 export async function verifyTokenHash(token:string,tokenHash:string) {
     return bcrypt.compare(token,tokenHash);
 }
+
+export function getInviteExpiry(days=5):Date {
+    const expires=new Date();
+    expires.setDate(expires.getDate()+days);
+    return expires;
+}

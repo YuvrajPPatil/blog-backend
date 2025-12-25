@@ -5,7 +5,7 @@ import dbConnect from "./utils/dbConnect";
 import blogRoutes from "./routes/blog.route";
 import authRoutes from  "./routes/auth.route";
 import userRoutes from "./routes/user.route";
-
+import adminRoutes from "./routes/admin.route";
 dotenv.config();
 dbConnect();
 
@@ -19,6 +19,7 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/user",userRoutes);
 
+app.use("/api/admin",adminRoutes);
   
 // Test Route
 app.get("/", (req, res) => {
