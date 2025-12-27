@@ -20,7 +20,7 @@ export const createInvite= async(req:Request,res:Response)=>{
         email,
         role,
         tokenHash,
-         expireAt,
+        expireAt,
         createdBy:req.user?.id,       
     });
 

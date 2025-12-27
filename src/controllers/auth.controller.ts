@@ -2,16 +2,20 @@ import { Request, Response } from "express";
 import User,{IUser} from "../models/user.model";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import {Invite, verifyTokenHash} from "../models/invite.model";
- 
+import { verifyTokenHash } from "../utils/invite.utils";
+import Invite from "../models/invite.model";
+
 export const register =async(req:Request, res:Response)=>{
     try{
          const {username, email, password,inviteToken}=req.body;
-
-         const invite=await Invite.findOne({token:inviteToken});
-
+        
+         if (!inviteToken) {
+            return res.status(400).json({ message: "Invite token required" });
+        } 
+         const invite=await Invite.findOne({email}); 
         if(!invite)return res.status(400).json({message:"Invalid invite"});
-        if(!invite.used)return res.status(400).json({message:"Invite already used"});
+
+        if(invite.used)return res.status(400).json({message:"Invite already used"});
         
         const isValid = await verifyTokenHash(inviteToken, invite.tokenHash);
         if (!isValid) {
@@ -26,6 +30,10 @@ export const register =async(req:Request, res:Response)=>{
 
          const hashPassword=await bcrypt.hash(password,10);
          const user=await User.create({username,email,password:hashPassword,role:invite.role});
+
+         invite.used = true; 
+        invite.usedAt=new Date();
+         await invite.save();
 
          res.status(200).json({message:"User registred successfully", user});
 

@@ -5,14 +5,14 @@ export interface JwtPayload{
     id: string; role: string
 }  
 
-export interface AuthRequest extends Request {
-  user?: JwtPayload;
-}
-
-export const protect=(req: AuthRequest, res:Response,next:NextFunction)=>{
+export const protect=(req: Request, res:Response,next:NextFunction):void=>{
     try{
             const token=req.headers.authorization?.split(" ")[1];
-            if(!token) return res.status(401).json({message:"No token, authorization denied"});
+            if(!token)  
+              {
+                res.status(401).json({message:"No token, authorization denied"});
+                return;
+              }
 
             const decoded=jwt.verify(token,process.env.JWT_SECRET as string) as JwtPayload ;
             req.user=decoded;

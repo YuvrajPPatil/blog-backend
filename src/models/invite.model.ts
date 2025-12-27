@@ -5,6 +5,7 @@ export interface INVS extends Document{
     tokenHash:string;
     role:"admin"|"author";
     used:boolean;
+    usedAt:Date;
     expireAt:Date; 
     createdBy: mongoose.Types.ObjectId;
 }
@@ -15,6 +16,7 @@ const inviteSchema= new Schema<INVS>({
         tokenHash:{type:String, required:true},
         role:{type:String,enum:["admin","author"], default:"author"},
         used:{type:Boolean,default:false},
+        usedAt:{type:Date},
         expireAt:{type:Date,required:true},
         createdBy:{type:mongoose.Schema.Types.ObjectId, ref:"User"},
     },

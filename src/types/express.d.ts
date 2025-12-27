@@ -8,7 +8,9 @@ declare global {
         }
 
         interface Request {
-            user?: User; // Make it optional because auth middleware might not run
+            user?: JwtPayload; // Make it optional because auth middleware might not run
         }
     }
 }
+
+export {};

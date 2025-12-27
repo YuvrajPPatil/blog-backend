@@ -1,0 +1,13 @@
+# dependencies
+node_modules/
+
+# environment variables
+.env
+.env.local
+.env.development
+.env.production
+# Docker
+*.log
+# OS files
+.DS_Store
+Thumbs.db
