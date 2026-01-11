@@ -8,6 +8,7 @@ export const ROLE_PERMISSIONS:Record<string,string[]>={
          PERMISSIONS.DELETE_POST,
          PERMISSIONS.CREATE_POST,
          PERMISSIONS.EDIT_OWN_POST,
+         PERMISSIONS.VIEW_AUDIT_LOG,
   
     ],
     [ROLES.AUTHOR]:[

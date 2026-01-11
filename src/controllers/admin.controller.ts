@@ -3,6 +3,7 @@ import Invite from "../models/invite.model";
 import { generateInviteToken,getInviteExpiry,hashInviteToken } from "../utils/invite.utils";
 import { INVITE_EXPIRY_DAYS,FRONTEND_URL } from "../config";
 import emailQueue from "../queues/email.queue";
+import { auditLog } from "../services/audit.service";
 
 export const createInvite= async(req:Request,res:Response)=>{
 
@@ -22,6 +23,14 @@ export const createInvite= async(req:Request,res:Response)=>{
         tokenHash,
         expireAt,
         createdBy:req.user?.id,       
+    });
+
+    await auditLog({
+        action: "INVITE_CREATED",
+        user: req.user,
+        resource: "Invite",
+        metadata: { email, role },
+        req,
     });
 
     //send token to user via email

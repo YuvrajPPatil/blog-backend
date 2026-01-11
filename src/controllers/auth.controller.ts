@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { verifyTokenHash } from "../utils/invite.utils";
 import Invite from "../models/invite.model";
+import { auditLog } from "../services/audit.service";
 
 export const register =async(req:Request, res:Response)=>{
     try{
@@ -35,6 +36,12 @@ export const register =async(req:Request, res:Response)=>{
         invite.usedAt=new Date();
          await invite.save();
 
+         await auditLog({
+            action: "INVITE_USED",
+            resource: "Invite",
+            resourceId: invite._id.toString(),
+            metadata: { email: user.email },
+        });
          res.status(200).json({message:"User registred successfully", user});
 
     }catch(error){
@@ -55,6 +62,11 @@ export const login= async(req:Request,res:Response)=>{
 
         const token=jwt.sign({id:user._id,role:user.role},process.env.JWT_SECRET as string,{expiresIn:"1h"} );
         
+        await auditLog({
+            action: "LOGIN_SUCCESS",
+            user,
+            req,
+        });
         res.status(200).json(
             {message:"Login successful",
                 token,

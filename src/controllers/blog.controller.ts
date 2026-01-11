@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Blog from "../models/blog.model";
 import Comment from "../models/comment.model"
 import { request } from "http";
+import { auditLog } from "../services/audit.service";
 
 export const createBlog= async(req:Request, res:Response)=>{
     try{
@@ -15,7 +16,13 @@ export const createBlog= async(req:Request, res:Response)=>{
             author : req.user.id, //from jwt
             status:"pending",
         });
-       
+       await auditLog({
+            action: "BLOG_CREATED",
+            user: req.user,
+            resource: "Blog",
+            resourceId: blog._id.toString(),
+            req,
+        });
        return  res.status(201).json(blog);
 
     }catch(error){
