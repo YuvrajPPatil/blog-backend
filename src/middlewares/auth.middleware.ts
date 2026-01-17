@@ -7,7 +7,9 @@ export interface JwtPayload{
 
 export const protect=(req: Request, res:Response,next:NextFunction):void=>{
     try{
-            const token=req.headers.authorization?.split(" ")[1];
+          //  const token=req.headers.authorization?.split(" ")[1];
+              const token = req.cookies?.access_token;
+
             if(!token)  
               {
                 res.status(401).json({message:"No token, authorization denied"});

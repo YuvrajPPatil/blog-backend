@@ -62,6 +62,14 @@ export const login= async(req:Request,res:Response)=>{
 
         const token=jwt.sign({id:user._id,role:user.role},process.env.JWT_SECRET as string,{expiresIn:"1h"} );
         
+        res.cookie("access token",token,{
+            httpOnly:true,
+            secure:process.env.NODE_ENV === 'production',
+            sameSite:"lax",
+            maxAge:60*60*1000, //1 hour
+
+        });
+
         await auditLog({
             action: "LOGIN_SUCCESS",
             user,
@@ -69,15 +77,32 @@ export const login= async(req:Request,res:Response)=>{
         });
         res.status(200).json(
             {message:"Login successful",
-                token,
                 user:{
                     id:user._id,
                     name:user.username,
                     email:user.email
                 }
-            }
+            },
         );
     }catch(error){
         res.status(500).json({message:"Error logging in"});
     }
+};
+
+export const logout = (req: Request, res: Response) => {
+  res.clearCookie("access_token");
+  return res.status(200).json({ message: "Logged out successfully" });
+};
+
+export const me = async (req: Request, res: Response) => {
+  try {
+    const user = await User.findById(req.user?.id).select("-password");
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    res.status(200).json({ user });
+  } catch {
+    res.status(401).json({ message: "Unauthorized" });
+  }
 };

@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:6
+    container_name: blog-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  api:
+    build: .
+    container_name: blog-api
+    command: npm run start
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+      - redis
+    env_file:
+      - .env
+    environment:
+      MONGO_URI: mongodb://mongo:27017/blogapp2
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+  worker:
+    build: .
+    container_name: blog-worker
+    command: npx ts-node src/worker/email.worker.ts
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+  redis:
+    image: redis:7
+    container_name: blog-redis
+ 
+volumes:
+  mongo_data:
