@@ -16,8 +16,10 @@ export const protect=(req: Request, res:Response,next:NextFunction):void=>{
                 return;
               }
 
-            const decoded=jwt.verify(token,process.env.JWT_SECRET as string) as JwtPayload ;
-            req.user=decoded;
+            const decoded=jwt.verify(
+              token,
+              process.env.JWT_SECRET as string) as JwtPayload ;
+              req.user=decoded;
             next();
     }catch(error){
             res.status(401).json({ message: "Token is not valid" });

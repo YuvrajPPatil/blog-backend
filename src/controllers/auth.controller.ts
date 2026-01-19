@@ -58,14 +58,17 @@ export const login= async(req:Request,res:Response)=>{
         if(!user) return res.status(400).json({message:"Invalid Credentials"});
 
         const isMatch=await bcrypt.compare(password,user.password);
+       
         if(!isMatch) return res.status(400).json({message:"Invalid Credentials"});
 
         const token=jwt.sign({id:user._id,role:user.role},process.env.JWT_SECRET as string,{expiresIn:"1h"} );
-        
-        res.cookie("access token",token,{
+         
+        res.cookie("access_token",token,{
             httpOnly:true,
-            secure:process.env.NODE_ENV === 'production',
+           // secure:process.env.NODE_ENV === 'production',
+           secure:false,
             sameSite:"lax",
+            path: "/",  
             maxAge:60*60*1000, //1 hour
 
         });
